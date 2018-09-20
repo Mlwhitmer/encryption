@@ -13,8 +13,6 @@ def encrypt(block_number, iv_counter, msg_block):
 	for i in range(0, len(msg_block)):
 		xor_block[i] = bytearray(ivFk)[i] ^ msg_block[i]
 
-	print(bytearray(xor_block))
-
 	encryption_blocks[block_number] = bytearray(xor_block)
 
 	return
@@ -78,12 +76,26 @@ encryption_blocks = [None] * len(iv_counters)
 #thread encryption and run in parallel
 threads = []
 for i in range(len(iv_counters)):
-    t = threading.Thread(target=encrypt(i, iv, blocks[i]))
-    threads.append(t)
-    t.start()
+	t = threading.Thread(target=encrypt(i, iv, blocks[i]))
+	threads.append(t)
+	t.start()
 
-# for t in my_threads:
-#     if not t.isAlive():
-#         # get results from thtead
-#         t.handled = True
-# my_threads = [t for t in my_threads if not t.handled]
+#check = True
+
+#while check:
+#	threads_done = True
+#	for t in threads:
+#		if not t.isAlive():
+#			print(t.isAlive())
+#			threads_done = False
+#			break
+#	if threads_done:
+#		for i in encryption_blocks:
+#			out.write(i)
+#		check = False
+#		break
+
+for i in encryption_blocks:
+	out.write(i)
+
+out.close()
