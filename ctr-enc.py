@@ -6,8 +6,6 @@ import threading
 
 def encrypt(block_number, iv_counter, msg_block):
 
-	# xor_block = iv_counter ^ msc_block
-
 	ivFk = Fk.encrypt(iv_counter)
 
 	xor_block = [None] * len(msg_block)
