@@ -2,12 +2,22 @@ from Crypto.Cipher import AES
 from Crypto import Random
 import sys, argparse
 
-
 # key = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 # cipher = AES.new(key, AES.MODE_ECB);
 # msg = cipher.encrypt();
 # print(msg);
 
+def ctr_d(iv, key, input, output):
+	
+	with open(input, 'rb') as inputFile:
+		msg = inputFile.read()
+	print(str(msg))
+	
+	
+	counter = 0
+
+
+##############################################################################
 cmd = argparse.ArgumentParser(
     )
 
@@ -18,9 +28,6 @@ args = cmd.parse_args()
 
 iv = Random.get_random_bytes(16)
 
+ctr_d(iv, args.key, args.input, args.output)
 
 
-def ctr_e(key, iv, input, output): 
-
-	with open(input, 'r') as inputFile:
-		msg = inputfile.read()
