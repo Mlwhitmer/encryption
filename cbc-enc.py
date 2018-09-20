@@ -34,13 +34,15 @@ Fk = AES.new(bytearray.fromhex(fKey),AES.MODE_ECB)
 out = open(outputfile,"wb+")
 out.write(iv)
 
-
+pad_neeeded = False;
 bool = True
 
 in = open(inputfile,"rb")
-while bool:
+while True:
 	m_block = bytearray(in.read(16))
-	
+	if len(m_block) != 16:
+		pad_needed = True;
+		pads = 16 - len(m_block)
 	if bool:
 		for i in range(0,16):
 			xor_block = iv[i] ^ m_block[i]
@@ -55,4 +57,11 @@ while bool:
 		out.write(c_block)
 		prev_m_iv = bytearray(c_block)
 
-		 
+if pad_needed:
+	m_block = bytearray(pads)
+	for i in range(0,len(pads)):
+		xor_block = m_block[i] ^ prev_m_iv[i]
+	c_block = Fk.encrypt(bytearray(xor_block))
+	out.write(c_block)
+
+out.close()
