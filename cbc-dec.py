@@ -40,3 +40,4 @@ while True:
 	iv = c_block
 
 out.close()
+in.close()
