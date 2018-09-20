@@ -1,9 +1,26 @@
-#!/usr/bin/env python3
-
 from Crypto.Cipher import AES
 from Crypto import Random
-import sys, argparse
-import struct
+import argparse
+import threading
+
+
+def encrypt(block_number, iv_counter, msg_block):
+
+	# xor_block = iv_counter ^ msc_block
+
+	ivFk = Fk.encrypt(iv_counter)
+
+	xor_block = [None] * len(msg_block)
+
+	for i in range(0, len(msg_block)):
+		xor_block[i] = bytearray(ivFk)[i] ^ msg_block[i]
+
+	print(bytearray(xor_block))
+
+	encryption_blocks[block_number] = bytearray(xor_block)
+
+	return
+
 
 cmd = argparse.ArgumentParser(
     )
@@ -28,16 +45,47 @@ inK = open(key, "r")
 fKey = inK.read().strip()
 inK.close()
 
-with open(input, 'r') as inputFile:
-	msg = inputFile.read()
-
 #block cipher
-Fk = AES.new(str(bytearray.fromhex(fKey)), AES.MODE_ECB)
+Fk = AES.new(bytearray.fromhex(fKey), AES.MODE_ECB)
 
 #writing out IV to encrypted file
 out = open(output, "wb+")
 out.write(iv)
 
-int.from_bytes(iv, byteorder='big')
+bool = True
 
-#TODO need to get iv counters and xor try for encryption locally first
+#convert iv to int so we can increment
+iv_count = int.from_bytes(iv, byteorder='big')
+#initial iv count
+iv_count += 1
+
+iv_counters = []
+blocks = []
+
+#Read in message and divide into 16 byte chunks if possible else that is fine this is ctr
+inM = open(input, "rb")
+while True:
+	m_block = bytearray(inM.read(16))
+
+	if len(m_block) != 0:
+		blocks.append(m_block)
+		iv_counters.append(iv_count)
+		iv_count += 1
+	else:
+		break
+
+encryption_blocks = [None] * len(iv_counters)
+
+
+#thread encryption and run in parallel
+threads = []
+for i in range(len(iv_counters)):
+    t = threading.Thread(target=encrypt(i, iv, blocks[i]))
+    threads.append(t)
+    t.start()
+
+# for t in my_threads:
+#     if not t.isAlive():
+#         # get results from thtead
+#         t.handled = True
+# my_threads = [t for t in my_threads if not t.handled]
