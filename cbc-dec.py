@@ -34,8 +34,9 @@ out = open(outputfile,"wb+")
 while True:
 	c_block = bytearray(in.read(16))
 	fk_out = Fk.decrypt(c_block)
+	m_block = [None] * len(c_block)
 	for i in range(0,16):
-		m_block = fk_out[i] ^ iv[i]
+		m_block[i] = fk_out[i] ^ iv[i]
 	out.write(m_block)
 	iv = c_block
 

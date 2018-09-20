@@ -28,7 +28,7 @@ fKey = inp.read().strip()
 inp.close()
 
 #block cipher 
-Fk = AES.new(bytes.fromhex(fKey),AES.MODE_ECB)
+Fk = AES.new(bytearray.fromhex(fKey),AES.MODE_ECB)
 
 #writing out IV to encrypted file
 out = open(output,"wb+")
@@ -44,24 +44,27 @@ while True:
 		pad_needed = True;
 		pads = 16 - len(m_block)
 	if bool:
+		xor_block = [None] * len(m_block)
 		for i in range(0,16):
-			xor_block = iv[i] ^ m_block[i]
+			xor_block[i] = iv[i] ^ m_block[i]
 		c_block = Fk.encrypt(xor_block)
 		print(c_block)
 		out.write(c_block)
 		bool = False;
 		prev_m_iv = bytearray(c_block)
 	else:
+		xor_block = [None] * len(m_block)
 		for i in range(0,16):
-			xor_block = prev_m_iv[i] ^ m_block[i]
+			xor_block[i] = prev_m_iv[i] ^ m_block[i]
 		c_block = Fk.encrypt(bytearray(xor_block))
 		out.write(c_block)
 		prev_m_iv = bytearray(c_block)
 
 if pad_needed:
 	m_block = bytearray(pads)
+	xor_block = [None] * len(m_block)
 	for i in range(0,len(pads)):
-		xor_block = m_block[i] ^ prev_m_iv[i]
+		xor_block[i] = m_block[i] ^ prev_m_iv[i]
 	c_block = Fk.encrypt(bytearray(xor_block))
 	out.write(c_block)
 
