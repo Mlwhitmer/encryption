@@ -28,7 +28,7 @@ fKey = inp.read().strip()
 inp.close()
 
 #block cipher 
-Fk = AES.new(bytearray.fromhex(fKey),AES.MODE_ECB)
+Fk = AES.new(bytes.fromhex(fKey),AES.MODE_ECB)
 
 #writing out IV to encrypted file
 out = open(output,"wb+")
