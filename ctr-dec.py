@@ -5,16 +5,15 @@ import threading
 
 
 def encrypt(block_number, iv_counter, msg_block):
-
 	ivFk = Fk.encrypt(iv_counter)
-
+	
 	xor_block = [None] * len(msg_block)
-
+	
 	for i in range(0, len(msg_block)):
 		xor_block[i] = bytearray(ivFk)[i] ^ msg_block[i]
-
-    decryption_blocks[block_number] = bytearray(xor_block)
-
+	
+	decryption_blocks[block_number] = bytearray(xor_block)
+	
 	return
 
 
