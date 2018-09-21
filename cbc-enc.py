@@ -20,52 +20,86 @@ if input is None or key is None or output is None:
 	print("Incorrect usage\n")
 	exit(1)
 
-iv = bytearray(Random.get_random_bytes(16))
+#Get iv, this will be our first xor value
+xor_value = bytearray(Random.get_random_bytes(16))
 
 #reading in the key
 inp = open(key,"r")
 fKey = inp.read().strip()
 inp.close()
 
-#block cipher 
-Fk = AES.new(bytearray.fromhex(fKey),AES.MODE_ECB)
+#block cipher in AES ECB Mode
+Fk = AES.new(bytearray.fromhex(fKey), AES.MODE_ECB)
 
 #writing out IV to encrypted file
 out = open(output,"wb+")
-out.write(iv)
+out.write(xor_value)
 
-pad_neeeded = False;
-bool = True
+#This boolean is used to determine if we need to add a whole block of padding since last bit must always equal padding size
+padding_added = False
 
 inM = open(input,"rb")
 while True:
 	m_block = bytearray(inM.read(16))
-	if len(m_block) != 16:
-		pad_needed = True;
-		pads = 16 - len(m_block)
-	if bool:
-		xor_block = [None] * len(m_block)
-		for i in range(0,16):
-			xor_block[i] = iv[i] ^ m_block[i]
-		c_block = Fk.encrypt(xor_block)
-		print(c_block)
-		out.write(c_block)
-		bool = False;
-		prev_m_iv = bytearray(c_block)
-	else:
-		xor_block = [None] * len(m_block)
-		for i in range(0,16):
-			xor_block[i] = prev_m_iv[i] ^ m_block[i]
-		c_block = Fk.encrypt(bytearray(xor_block))
-		out.write(c_block)
-		prev_m_iv = bytearray(c_block)
 
-if pad_needed:
-	m_block = bytearray(pads)
-	xor_block = [None] * len(m_block)
-	for i in range(0,len(pads)):
-		xor_block[i] = m_block[i] ^ prev_m_iv[i]
-	c_block = Fk.encrypt(bytearray(xor_block))
-	out.write(c_block)
+	if len(m_block) != 0:
+		if len(m_block) != 16:
+			pad_size = 16 - len(m_block)
+			#Append the padding size to the end of the last block
+			for i in range(0, pad_size):
+				m_block += bytes([pad_size])
+
+			xor_block = [None] * 16
+
+			# XOR the xor_value with the m_block
+			for i in range(0, 16):
+				xor_block[i] = xor_value[i] ^ m_block[i]
+
+			# Get the encryped xor_block
+			encryped_block = Fk.encrypt(bytearray(xor_block))
+
+			# write
+			out.write(encryped_block)
+
+			padding_added = True;
+
+		else:
+			xor_block = [None] * 16
+
+			#XOR the xor_value with the m_block
+			for i in range(0, 16):
+				xor_block[i] = xor_value[i] ^ m_block[i]
+
+			# Get the encryped xor_block
+			encryped_block = Fk.encrypt(bytearray(xor_block))
+
+			#Set new xor_value for later xoring
+			xor_value = encryped_block
+
+			#write
+			out.write(encryped_block)
+	else:
+		break
+
+#Add a whole 16 byte block of padding
+if not padding_added:
+	m_block = bytearray()
+
+	for i in range(0, 16):
+		m_block += bytes([16])
+
+	xor_block = [None] * 16
+
+	# XOR the xor_value with the m_block
+	for i in range(0, 16):
+		xor_block[i] = xor_value[i] ^ m_block[i]
+
+	# Get the encryped xor_block
+	encryped_block = Fk.encrypt(bytearray(xor_block))
+
+	# write
+	out.write(encryped_block)
+
+	padding_added = True
 
 out.close()
