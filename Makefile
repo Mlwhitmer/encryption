@@ -6,3 +6,5 @@ All:
 	chmod +x ctr-dec
 	chmod +x cbc-enc
 	chmod +x cbc-dec
+	chmod +x cbcmac-tag
+	chmod +x cbcmac-validate
